@@ -3,11 +3,24 @@ from hashlib import sha256
 from .vendor import base58
 
 
-class BitcoinKey(object):
+def key_factory(coin_name=None, application_byte=None):
+    return type(
+        coin_name + 'Key',
+        (Key,),
+        {
+            '_application_byte': application_byte,
+        }
+    )
 
-    _b58_private_key = None
+
+class Key(object):
+
+    # Required attributes
+    _application_byte = None
+
+
+    # instance attributes
     _passphrase = None
-    _application_byte = b'\x80'
 
     @property
     def passphrase(self):
@@ -25,6 +38,8 @@ class BitcoinKey(object):
         #passphrase must be provided; it can't be calculated.
         raise AttributeError()
 
+    _private_key = None
+
     @property
     def private_key(self):
         """ The private key (WIF/wallet import format)
@@ -36,20 +51,18 @@ class BitcoinKey(object):
         """
 
         # If the private key is available directly, return it
-        if self._b58_private_key:
-            return self._b58_private_key
+        if self._private_key:
+            return self._private_key
 
         # if the secret exponent exists, generate and cache the private key
         if self._secret_exponent:
-            self._b58_private_key = base58.check_encode(
+            self._private_key = base58.check_encode(
                 self._application_byte + self._secret_exponent.digest()
             )
-            return self._b58_private_key
+            return self._private_key
 
         # can't find or calculate the private key
         raise AttributeError()
-
-
 
     @property
     def _secret_exponent(self):
@@ -66,5 +79,9 @@ class BitcoinKey(object):
         :param passphrase:
         :param private_key: base58check-encoded
         """
+        # check that the class has coin-specific attributes set
+        if not self._application_byte:
+            raise UnboundLocalError('All required attributes not set')
+
         self._passphrase = passphrase
-        self._b58_private_key = private_key
+        self._private_key = private_key

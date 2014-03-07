@@ -1,7 +1,7 @@
 from nose.tools import *
 import unittest
 
-from cryptocoin.key import BitcoinKey
+from cryptocoin import BitcoinKey
 
 PASSPHRASE = 'correct horse battery staple'
 SECRET_EXPONENT = (
