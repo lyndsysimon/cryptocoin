@@ -55,7 +55,3 @@ def b58c_decode(coded_string, application_byte=None):
             raise ValueError('Application byte check failed')
 
     return extended_payload[2:]
-
-if __name__ == '__main__':
-    assert b58c_encode(SECRET_EXPONENT, '80') == PRIVATE_KEY
-    print(repr(b58c_decode(PRIVATE_KEY, '80')))
