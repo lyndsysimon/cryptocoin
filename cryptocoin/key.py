@@ -1,6 +1,10 @@
+from binascii import unhexlify
 from hashlib import sha256
 
-from .vendor import base58
+from ecdsa.curves import SECP256k1
+from ecdsa.keys import SigningKey
+
+from .base58 import b58c_decode, b58c_encode
 
 
 def key_factory(coin_name=None, application_byte=None):
@@ -55,25 +59,55 @@ class Key(object):
             return self._private_key
 
         # if the secret exponent exists, generate and cache the private key
-        if self._secret_exponent:
-            self._private_key = base58.check_encode(
-                self._application_byte + self._secret_exponent.digest()
+        if self.secret_exponent:
+            self._private_key = b58c_encode(
+                self.secret_exponent,
+                self._application_byte,
             )
             return self._private_key
 
         # can't find or calculate the private key
         raise AttributeError()
 
+    _public_key = None
+
     @property
-    def _secret_exponent(self):
-        if self._passphrase:
-            return sha256(self._passphrase.encode('utf-8'))
+    def public_key(self):
+        """
+        """
+
+        if self._public_key:
+            return self._public_key
+
+        point = SigningKey.from_secret_exponent(
+            secexp=int(self.secret_exponent, 16),
+            curve=SECP256k1,
+            hashfunc=sha256,
+        ).verifying_key.pubkey.point
+
+        return ''.join(('04',
+                        hex(point.x())[2:].strip('L'),
+                        hex(point.y())[2:].strip('L'),
+                        ))
+
+    _secret_exponent = None
 
     @property
     def secret_exponent(self):
-        return self._secret_exponent.hexdigest()
+        if self._secret_exponent:
+            return self._secret_exponent
 
-    def __init__(self, passphrase=None, private_key=None):
+        if self._passphrase:
+            self._secret_exponent = sha256(self._passphrase.encode('utf-8')).hexdigest()
+            return self._secret_exponent
+
+        if self._private_key:
+            self._secret_exponent = b58c_decode(self._private_key, self._application_byte)
+            return self._secret_exponent
+
+        raise AttributeError()
+
+    def __init__(self, passphrase=None, private_key=None, secret_exponent=None):
         """
 
         :param passphrase:
@@ -85,3 +119,4 @@ class Key(object):
 
         self._passphrase = passphrase
         self._private_key = private_key
+        self._secret_exponent = secret_exponent
