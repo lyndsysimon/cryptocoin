@@ -1,5 +1,5 @@
+import hashlib
 from binascii import unhexlify
-from hashlib import sha256
 
 from ecdsa.curves import SECP256k1
 from ecdsa.keys import SigningKey
@@ -24,6 +24,18 @@ class Key(object):
 
 
     # instance attributes
+    _address = None
+
+    @property
+    def address(self):
+        if not self._address:
+            rip = hashlib.new('ripemd160')
+            rip.update(hashlib.sha256(unhexlify(self.public_key)).digest())
+            # TODO: This hasn't been tested with leading zero bytes in the hash
+            self._address = '1' + b58c_encode(rip.hexdigest(), '00')
+
+        return self._address
+
     _passphrase = None
 
     @property
@@ -82,7 +94,7 @@ class Key(object):
         point = SigningKey.from_secret_exponent(
             secexp=int(self.secret_exponent, 16),
             curve=SECP256k1,
-            hashfunc=sha256,
+            hashfunc=hashlib.sha256,
         ).verifying_key.pubkey.point
 
         return ''.join(('04',
@@ -98,7 +110,7 @@ class Key(object):
             return self._secret_exponent
 
         if self._passphrase:
-            self._secret_exponent = sha256(self._passphrase.encode('utf-8')).hexdigest()
+            self._secret_exponent = hashlib.sha256(self._passphrase.encode('utf-8')).hexdigest()
             return self._secret_exponent
 
         if self._private_key:
