@@ -6,6 +6,7 @@ _radix = len(_alphabet)
 
 
 def b58_encode(hex_string):
+
     val = int(hex_string, 16)
     encoded = []
     while val >= _radix:
@@ -14,18 +15,23 @@ def b58_encode(hex_string):
     if val:
         encoded.append(_alphabet[val])
 
+    if hex_string[:2] == b'00':
+        encoded.append(_alphabet[0])
+
     return ''.join(encoded[::-1])
 
 
-def b58c_encode(payload, application_byte):
+def b58c_encode(payload, version_byte):
     """ Encode a given hex string using Bitcoin's base58 scheme, with a checksum
 
     :rtype: string
     """
-    extended_payload = application_byte + payload
+    extended_payload = version_byte + payload
     #return extended_payload
     checksum = sha256(sha256(unhexlify(extended_payload)).digest()).digest()[:4]
-    return b58_encode(extended_payload.encode('utf-8') + hexlify(checksum))
+    return b58_encode(
+        extended_payload.encode('utf-8') + hexlify(checksum)
+    )
 
 
 def b58_decode(coded_string):

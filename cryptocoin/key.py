@@ -7,12 +7,15 @@ from ecdsa.keys import SigningKey
 from .base58 import b58c_decode, b58c_encode
 
 
-def key_factory(coin_name=None, application_byte=None):
+def key_factory(coin_name=None,
+                pubkey_hash=None,
+                privkey_hash=None):
     return type(
         coin_name + 'Key',
         (Key,),
         {
-            '_application_byte': application_byte,
+            '_pubkey_hash': pubkey_hash,
+            '_privkey_hash': privkey_hash,
         }
     )
 
@@ -20,7 +23,8 @@ def key_factory(coin_name=None, application_byte=None):
 class Key(object):
 
     # Required attributes
-    _application_byte = None
+    _pubkey_hash = None
+    _privkey_hash = None
 
 
     # instance attributes
@@ -32,7 +36,7 @@ class Key(object):
             rip = hashlib.new('ripemd160')
             rip.update(hashlib.sha256(unhexlify(self.public_key)).digest())
             # TODO: This hasn't been tested with leading zero bytes in the hash
-            self._address = '1' + b58c_encode(rip.hexdigest(), '00')
+            self._address = b58c_encode(rip.hexdigest(), self._pubkey_hash)
 
         return self._address
 
@@ -74,7 +78,7 @@ class Key(object):
         if self.secret_exponent:
             self._private_key = b58c_encode(
                 self.secret_exponent,
-                self._application_byte,
+                self._privkey_hash,
             )
             return self._private_key
 
@@ -110,11 +114,13 @@ class Key(object):
             return self._secret_exponent
 
         if self._passphrase:
-            self._secret_exponent = hashlib.sha256(self._passphrase.encode('utf-8')).hexdigest()
+            self._secret_exponent = hashlib.sha256(
+                self._passphrase.encode('utf-8')
+            ).hexdigest()
             return self._secret_exponent
 
         if self._private_key:
-            self._secret_exponent = b58c_decode(self._private_key, self._application_byte)
+            self._secret_exponent = b58c_decode(self._private_key, self._privkey_hash)
             return self._secret_exponent
 
         raise AttributeError()
@@ -126,7 +132,7 @@ class Key(object):
         :param private_key: base58check-encoded
         """
         # check that the class has coin-specific attributes set
-        if not self._application_byte:
+        if not self._pubkey_hash:
             raise UnboundLocalError('All required attributes not set')
 
         self._passphrase = passphrase
