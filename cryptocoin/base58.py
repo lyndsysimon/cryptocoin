@@ -50,7 +50,7 @@ def b58c_decode(coded_string, application_byte=None):
         raise ValueError('Checksum validation failed')
 
     if application_byte is not None:
-        if extended_payload[:2] != application_byte:
+        if extended_payload[:2].lower() != application_byte.lower():
             raise ValueError('Application byte check failed')
 
     return extended_payload[2:]

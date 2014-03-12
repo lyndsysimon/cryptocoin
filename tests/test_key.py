@@ -33,26 +33,9 @@ class KeyTestCase(unittest.TestCase):
         )
 
 
-class BitcoinKeyTestCase(KeyTestCase):
-    __test__ = False
-
-    PASSPHRASE = 'correct horse battery staple'
-    SECRET_EXPONENT = (
-        'c4bbcb1fbec99d65bf59d85c8cb62ee2db963f0fe106f483d9afa73bd4e39a8a'
-    )
-    PRIVATE_KEY = '5KJvsngHeMpm884wtkJNzQGaCErckhHJBGFsvd3VyK5qMZXj3hS'
-    PUBLIC_KEY = (
-        '04'  # First byte, per the Bitcoin specification
-        '78d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71'  # x
-        'a1518063243acd4dfe96b66e3f2ec8013c8e072cd09b3834a19f81f659cc3455'  # y
-    )
-    ADDRESS = '1JwSSubhmg6iPtRjtyqhUYYH7bZg3Lfy1T'
-
-
-@istest
-class PassphraseTestCase(BitcoinKeyTestCase):
+class GenericPassphraseTestCase(KeyTestCase):
     def setUp(self):
-        self.key = BitcoinKey(passphrase=self.PASSPHRASE)
+        self.key = self.Key(passphrase=self.PASSPHRASE)
 
     def test_passphrase(self):
         assert_equal(
@@ -73,10 +56,9 @@ class PassphraseTestCase(BitcoinKeyTestCase):
         )
 
 
-@istest
-class PrivateKeyTestCase(BitcoinKeyTestCase):
+class GenericPrivateKeyTestCase(KeyTestCase):
     def setUp(self):
-        self.key = BitcoinKey(private_key=self.PRIVATE_KEY)
+        self.key = self.Key(private_key=self.PRIVATE_KEY)
 
     def test_private_key(self):
         assert_equal(
@@ -97,10 +79,9 @@ class PrivateKeyTestCase(BitcoinKeyTestCase):
         )
 
 
-@istest
-class SecretExponentTestCase(BitcoinKeyTestCase):
+class GenericSecretExponentTestCase(KeyTestCase):
     def setUp(self):
-        self.key = BitcoinKey(secret_exponent=self.SECRET_EXPONENT)
+        self.key = self.Key(secret_exponent=self.SECRET_EXPONENT)
 
     def test_secret_exponent(self):
         assert_equal(
