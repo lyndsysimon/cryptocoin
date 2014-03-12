@@ -23,10 +23,8 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-# Get the long description from the relevant file
-# with codecs.open('DESCRIPTION.rst', encoding='utf-8') as f:
-#     long_description = f.read()
-long_description = 'placeholder'
+with open('README.rst') as f:
+    long_description = f.read()
 
 setup(
     name='cryptocoin',
