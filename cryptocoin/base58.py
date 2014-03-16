@@ -5,7 +5,34 @@ _alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 _radix = len(_alphabet)
 
 
+def _normalize_hex(hex_string):
+    """Given a hex string, strip leading and trailing characters
+
+    :param hex_string: string of hex characters
+
+    :raises: `ValueError`if non-hex characters remain after processing
+
+    :return str:hex string
+
+    """
+    hex_string = hex_string.lower()
+
+    # Strip out "0x"
+    if hex_string[:2] == '0x':
+        hex_string = hex_string[2:]
+
+    # Longs have an "L" suffix in Python 2.x
+    hex_string = hex_string.strip('l')
+
+    if set(hex_string) - set('0123456789abcdef'):
+        raise ValueError('"{} is not a valid hex string'.format(hex_string))
+
+    return hex_string
+
+
 def b58_encode(hex_string):
+    """Encode a given hex string.using Bitcoin's base58 scheme.
+    """
 
     val = int(hex_string, 16)
     encoded = []
@@ -22,10 +49,11 @@ def b58_encode(hex_string):
 
 
 def b58c_encode(payload, version_byte):
-    """ Encode a given hex string using Bitcoin's base58 scheme, with a checksum
+    """Encode a given hex string using Bitcoin's base58chack scheme
 
     :rtype: string
     """
+    payload = _normalize_hex(payload)
     extended_payload = version_byte + payload
     #return extended_payload
     checksum = sha256(sha256(unhexlify(extended_payload)).digest()).digest()[:4]
