@@ -2,8 +2,10 @@ from nose.tools import istest
 
 from cryptocoin import BitcoinKey
 from .test_key import (
+    GenericAddressTestCase,
     GenericPassphraseTestCase,
     GenericPrivateKeyTestCase,
+    GenericPublicKeyTestCase,
     GenericSecretExponentTestCase,
     KeyTestCase,
 )
@@ -39,4 +41,14 @@ class PrivateKeyTestCase(GenericPrivateKeyTestCase, BitcoinKeyTestCase):
 
 @istest
 class SecretExponentTestCase(GenericSecretExponentTestCase, BitcoinKeyTestCase):
+    pass
+
+
+@istest
+class PublicKeyTestCase(GenericPublicKeyTestCase, BitcoinKeyTestCase):
+    pass
+
+
+@istest
+class AddressTestCase(GenericAddressTestCase, BitcoinKeyTestCase):
     pass

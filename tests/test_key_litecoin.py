@@ -2,8 +2,10 @@ from nose.tools import istest
 
 from cryptocoin import LitecoinKey
 from .test_key import (
+    GenericAddressTestCase,
     GenericPassphraseTestCase,
     GenericPrivateKeyTestCase,
+    GenericPublicKeyTestCase,
     GenericSecretExponentTestCase,
     KeyTestCase,
 )
@@ -38,5 +40,15 @@ class PrivateKeyTestCase(GenericPrivateKeyTestCase, LitecoinKeyTestCase):
 
 
 @istest
-class SecretExponentTestCase(GenericPrivateKeyTestCase, LitecoinKeyTestCase):
+class SecretExponentTestCase(GenericSecretExponentTestCase, LitecoinKeyTestCase):
+    pass
+
+
+@istest
+class PublicKeyTestCase(GenericPublicKeyTestCase, LitecoinKeyTestCase):
+    pass
+
+
+@istest
+class AddressTestCase(GenericAddressTestCase, LitecoinKeyTestCase):
     pass

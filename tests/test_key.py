@@ -100,3 +100,17 @@ class GenericSecretExponentTestCase(KeyTestCase):
             self.key.public_key,
             self.PUBLIC_KEY,
         )
+
+
+class GenericPublicKeyTestCase(KeyTestCase):
+    def setUp(self):
+        self.key = self.Key(public_key=self.PUBLIC_KEY)
+
+
+class GenericAddressTestCase(KeyTestCase):
+    def setUp(self):
+        self.key = self.Key(address=self.ADDRESS)
+
+    def test_public_key(self):
+        with assert_raises(AttributeError):
+            _ = self.key.public_key

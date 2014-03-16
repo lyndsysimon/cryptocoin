@@ -125,7 +125,12 @@ class Key(object):
 
         raise AttributeError()
 
-    def __init__(self, passphrase=None, private_key=None, secret_exponent=None):
+    def __init__(self,
+                 passphrase=None,
+                 private_key=None,
+                 secret_exponent=None,
+                 public_key=None,
+                 address=None):
         """
 
         :param passphrase:
@@ -138,3 +143,5 @@ class Key(object):
         self._passphrase = passphrase
         self._private_key = private_key
         self._secret_exponent = secret_exponent
+        self._public_key = public_key
+        self._address = address
