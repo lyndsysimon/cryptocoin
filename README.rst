@@ -3,6 +3,9 @@ cryptocoin
 
 Cryptocurrencies for Humans.
 
+.. image:: https://api.travis-ci.org/lyndsysimon/cryptocoin.png
+   :target: https://travis-ci.org/lyndsysimon/cryptocoin
+
 # Quickstart
 
 To generate a Bitcoin address from a passphrase::
