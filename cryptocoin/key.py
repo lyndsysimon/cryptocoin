@@ -10,6 +10,21 @@ from .base58 import b58c_decode, b58c_encode
 def key_factory(coin_name=None,
                 pubkey_hash=None,
                 privkey_hash=None):
+    """Class factory - creates a base class for a specific currency type.
+
+    This is done so that the `Key` class is not tied to any individual fork of
+    Bitcoin.
+
+    :param coin_name: The human-readable name of the cryptocoin. Note that this
+                      is used to construct the `__name__` attribute of the
+                      returned class.
+    :param pubkey_hash: The "application byte" or "version byte" used to
+                        calculate a P2H address.
+    :param: privkey_hash: The "application byte" or "version byte" used to
+                          calculate a WIF-encoded private key.
+
+    :returns: A subclass of `Key`
+    """
     return type(
         coin_name + 'Key',
         (Key,),
@@ -22,17 +37,28 @@ def key_factory(coin_name=None,
 
 class Key(object):
 
-    # Required attributes
+    #######################
+    # Required Attributes #
+    #######################
+
+    # Used to calculate a P2H (pay to hash)
     _pubkey_hash = None
+
+    # Used to calculate a WIF-encoded private key
     _privkey_hash = None
 
+    #######################
+    # Instance Attributes #
+    #######################
 
-    # instance attributes
     _address = None
 
     @property
     def address(self):
+        """P2H - "pay to hash" - address."""
+
         if not self._address:
+            # Hash the public key twice - using SHA256, then RIPEMD-160
             rip = hashlib.new('ripemd160')
             rip.update(hashlib.sha256(unhexlify(self.public_key)).digest())
             # TODO: This hasn't been tested with leading zero bytes in the hash
@@ -120,7 +146,10 @@ class Key(object):
             return self._secret_exponent
 
         if self._private_key:
-            self._secret_exponent = b58c_decode(self._private_key, self._privkey_hash)
+            self._secret_exponent = b58c_decode(
+                self._private_key,
+                self._privkey_hash,
+            )
             return self._secret_exponent
 
         raise AttributeError()
@@ -131,13 +160,9 @@ class Key(object):
                  secret_exponent=None,
                  public_key=None,
                  address=None):
-        """
-
-        :param passphrase:
-        :param private_key: base58check-encoded
-        """
+        """"""
         # check that the class has coin-specific attributes set
-        if not self._pubkey_hash:
+        if not self._pubkey_hash or not self._privkey_hash:
             raise UnboundLocalError('All required attributes not set')
 
         self._passphrase = passphrase
