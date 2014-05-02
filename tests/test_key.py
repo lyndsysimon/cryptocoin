@@ -79,6 +79,44 @@ class GenericPrivateKeyTestCase(KeyTestCase):
         )
 
 
+class GenericCompressedPassphraseTestCase(KeyTestCase):
+    def setUp(self):
+        self.key = self.Key(
+            passphrase=self.PASSPHRASE,
+            compressed=True
+        )
+
+    def test_passphrase(self):
+        assert_equal(
+            self.key.passphrase,
+            self.PASSPHRASE,
+        )
+
+    def test_private_key(self):
+        assert_equal(
+            self.key.private_key,
+            self.COMPRESSED_PRIVATE_KEY
+        )
+
+    def test_public_key(self):
+        assert_equal(
+            self.key.public_key,
+            self.COMPRESSED_PUBLIC_KEY,
+        )
+
+    def test_secret_exponent(self):
+        assert_equal(
+            self.key.secret_exponent,
+            self.SECRET_EXPONENT,
+        )
+
+    def test_address(self):
+        assert_equal(
+            self.key.address,
+            self.COMPRESSED_ADDRESS
+        )
+
+
 class GenericSecretExponentTestCase(KeyTestCase):
     def setUp(self):
         self.key = self.Key(secret_exponent=self.SECRET_EXPONENT)

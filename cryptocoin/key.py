@@ -102,8 +102,12 @@ class Key(object):
 
         # if the secret exponent exists, generate and cache the private key
         if self.secret_exponent:
+            sec_exp = self.secret_exponent
+            if self.__compressed:
+                # append parity byte if key is compressed
+                sec_exp = sec_exp + '01'
             self._private_key = b58c_encode(
-                self.secret_exponent,
+                sec_exp,
                 self._privkey_hash,
             )
             return self._private_key
@@ -127,10 +131,17 @@ class Key(object):
             hashfunc=hashlib.sha256,
         ).verifying_key.pubkey.point
 
-        return ''.join(('04',
-                        hex(point.x())[2:].strip('L'),
-                        hex(point.y())[2:].strip('L'),
-                        ))
+        x = hex(point.x())[2:].strip('L')
+        y = hex(point.y())[2:].strip('L')
+
+        if self.__compressed:
+            return ''.join((
+                '02' if point.y() % 2 == 0 else '03',
+                x
+            ))
+        else:
+            return ''.join(('04', x, y))
+
 
     _secret_exponent = None
 
@@ -143,23 +154,24 @@ class Key(object):
             self._secret_exponent = hashlib.sha256(
                 self._passphrase.encode('utf-8')
             ).hexdigest()
-            return self._secret_exponent
 
-        if self._private_key:
+        elif self._private_key:
             self._secret_exponent = b58c_decode(
                 self._private_key,
                 self._privkey_hash,
             )
-            return self._secret_exponent
+        else:
+            raise AttributeError()
 
-        raise AttributeError()
+        return self._secret_exponent
 
     def __init__(self,
                  passphrase=None,
                  private_key=None,
                  secret_exponent=None,
                  public_key=None,
-                 address=None):
+                 address=None,
+                 compressed=False):
         """"""
         # check that the class has coin-specific attributes set
         if not self._pubkey_hash or not self._privkey_hash:
@@ -170,3 +182,4 @@ class Key(object):
         self._secret_exponent = secret_exponent
         self._public_key = public_key
         self._address = address
+        self.__compressed = compressed
