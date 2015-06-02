@@ -1,5 +1,8 @@
 *.py[cod]
 
+# Sphinx
+_build
+
 # C extensions
 *.so
 
